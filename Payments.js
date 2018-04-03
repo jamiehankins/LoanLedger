@@ -1,4 +1,4 @@
-var initialBalance = 70000;
+var initialBalance = 80000;
 var payments = [
 {
   "date": "8/8/2016",

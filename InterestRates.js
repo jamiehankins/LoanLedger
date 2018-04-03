@@ -1,9 +1,5 @@
+var initialRate = 5.25;
 var rates = [
-{
-  "date": "7/27/2016",
-  "rate": 5.25,
-  "daily": 0.01434426
-},
 {
   "date": "8/27/2016",
   "rate": 5.25,
