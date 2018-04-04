@@ -75,33 +75,22 @@ function getCol(val) {
   return valCol;
 }
 
-function buildRow(date, rate, amount) {
-  var row = document.createElement('div');
-  row.className = 'divTableRow';
-  var dateCol = getCol(date);
-  if(rate != '') {
-    rate += '%';
-  }
-  var rateCol = getCol(rate);
-  if(amount != '') {
-    amount = '$' + amount;
-  }
-  var amCol = getCol(amount);
-  row.appendChild(dateCol);
-  row.appendChild(rateCol);
-  row.appendChild(amCol);
-  return row;
+function calculateInterest(date, days, balance, rate) {
+  var dailyRate = isLeapYear(date.getFullYear()) ? rate / 100 / 366 : rate / 100 / 365;
+  var newBalance = balance * Math.pow(1 + dailyRate, days);
+  return newBalance - balance;
 }
 
 function chargeInterest(date, days, balance, rate) {
-  // Build interest charge row.
-  var chargeRow = document.createElement('div');
-  chargeRow.className = 'divTableRow';
   var dailyRate = isLeapYear(date.getFullYear()) ? rate / 100 / 366 : rate / 100 / 365;
   var newBalance = balance * Math.pow(1 + dailyRate, days);
   var interest = newBalance - balance;
+
+  // Build interest charge row.
+  var chargeRow = document.createElement('div');
+  chargeRow.className = 'divTableRow';
   chargeRow.appendChild(getCol(formatDate(date)));
-  chargeRow.appendChild(getCol('Interest (' + days + ' days)'));
+  chargeRow.appendChild(getCol('Accrued Interest (' + days + ' days)'));
   chargeRow.appendChild(getCol(formatDollars(interest)));
   chargeRow.appendChild(getCol(formatDollars(newBalance)));
 
@@ -126,21 +115,65 @@ function changeInterest(date, rate) {
   ledgerElement.appendChild(changeRow);
 }
 
-function applyPayment(date, amount, balance) {
-  balance -= amount;
-  // Build payment row.
-  var paymentRow = document.createElement('div');
-  paymentRow.className = 'divTableRow';
-  paymentRow.appendChild(getCol(formatDate(date)));
-  paymentRow.appendChild(getCol('Payment'));
-  paymentRow.appendChild(getCol(formatDollars(amount)));
-  paymentRow.appendChild(getCol(formatDollars(balance)));
+function applyPayment(date, days, balance, rate, amount) {
+  // First, get the interest since the last balance.
+  var interest = calculateInterest(date, days, balance, rate);
+  // Next, get how this affects the balance.
+  var balanceAdjustment = interest - amount;
+  var newBalance = balanceAdjustment + balance;
 
-  // Get ledger and add payment row.
-  var ledgerElement = document.getElementById('ledger');
-  ledgerElement.appendChild(paymentRow);
+  // First row will give accrued interest and days.
+  var accruedRow = document.createElement('div');
+  accruedRow.className = 'divTableRow';
+  accruedRow.appendChild(getCol(formatDate(date)));
+  accruedRow.appendChild(getCol('Accrued Interest (' + days + ' days)'));
+  accruedRow.appendChild(getCol(formatDollars(interest)));
+  accruedRow.appendChild(getCol(''));
 
-  return balance;
+  // Next row is the same regardless of whether the payment
+  // is more than the accrued interest.
+  var intRow = document.createElement('div');
+  intRow.className = 'divTableRow';
+  intRow.appendChild(getCol(''));
+  intRow.appendChild(getCol('Payment (Interest)'));
+  intRow.appendChild(getCol(formatDollars(interest)));
+  intRow.appendChild(getCol(''));
+  
+  // Next row is determined by whether outstanding interest
+  // is covered by payment.
+  var effectRow = document.createElement('div');
+  effectRow.classList = 'divTableRow';
+  if(balanceAdjustment < 0) {
+    effectRow.appendChild(getCol(''));
+    effectRow.appendChild(getCol('Payment (Principle)'));
+    effectRow.appendChild(getCol(formatDollars(amount - interest)));
+    effectRow.appendChild(getCol(''));
+  } else if(balanceAdjustment > 0) {
+    effectRow.appendChild(getCol(''));
+    effectRow.appendChild(getCol('Remaining Interest Applied'));
+    effectRow.appendChild(getCol(formatDollars(interest - amount)));
+    effectRow.appendChild(getCol(''));
+  }
+  // Note that in the rare case where balanceAdjustment == 0,
+  // we'll just do neither and skip the row mentioning principle
+  // payment or interest accrual.
+
+  // Total row is the same regardless.
+  var totalRow = document.createElement('div');
+  totalRow.className = 'divTableRow';
+  totalRow.appendChild(getCol(formatDate(date)));
+  totalRow.appendChild(getCol('Payment (Total)'));
+  totalRow.appendChild(getCol(formatDollars(amount)));
+  totalRow.appendChild(getCol(formatDollars(newBalance)));
+
+    // Get ledger and add rows.
+    var ledgerElement = document.getElementById('ledger');
+    ledgerElement.appendChild(accruedRow);
+    ledgerElement.appendChild(intRow);
+    ledgerElement.appendChild(effectRow);
+    ledgerElement.appendChild(totalRow); 
+
+  return newBalance;
 }
 
 
@@ -149,11 +182,15 @@ function getIt() {
   var prevDate = parseDate("7/27/2016");
   var balance = initialBalance;
 
+  var initialRow = document.createElement('div');
+  initialRow.className = 'divTableRow';
+  initialRow.appendChild(getCol(formatDate(prevDate)));
+  initialRow.appendChild(getCol('Initial Balance'));
+  initialRow.appendChild(getCol(''));
+  initialRow.appendChild(getCol(formatDollars(balance)));
+  document.getElementById('ledger').appendChild(initialRow);
   for(var i = 0; i < ledger.length; ++i) {
     var item = ledger[i];
-    if(item.date >= parseDate("1/1/2099")) {
-      break;
-    }
     if(item.rate != null && rate != ledger[i].rate) {
       var newDate = item.date;
       var days = daysBetween(prevDate, newDate);
@@ -164,19 +201,8 @@ function getIt() {
     } else if(item.amount != null) {
       var newDate = item.date;
       var days = daysBetween(prevDate, newDate);
-      balance = chargeInterest(newDate, days, balance, rate);
-      balance = applyPayment(newDate, item.amount, balance);
+      balance = applyPayment(newDate, days, balance, rate, item.amount);
       prevDate = newDate;
     }
-  }
-}
-
-function show() {
-  var ledgerElement = document.getElementById('ledger');
-  for(var i = 0; i < ledger.length - 1; ++i) {
-    var date = ledger[i].date;
-    var rate = ledger[i].rate != null ? ledger[i].rate : '';
-    var amount = ledger[i].amount != null ? ledger[i].amount : '';
-    ledgerElement.appendChild(buildRow(date, rate, amount));
   }
 }
