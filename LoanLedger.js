@@ -22,13 +22,15 @@ function initData() {
     var ret = 0;
     var aDate = a.date;
     var bDate = b.date;
-    if(aDate != bDate) {
+    if(formatDate(aDate) != formatDate(bDate)) {
       ret = aDate < bDate ? -1 : 1;
     } else {
       if(a.rate != null && b.rate == null) {
         ret = -1;
       } else if(a.rate == null && b.rate != null) {
         ret = 1;
+      } else if(a.amount != null && b.amount != null) {
+        ret = a.amount > b.amount ? -1 : 1;
       }
     }
     return ret;
@@ -39,6 +41,7 @@ function parseDate(s) {
   var d = new Date();
   s = s.split('/');
   d.setFullYear(s[2], s[0] - 1, s[1]);
+  d.setHours(0, 0, 0, 0);
   return d;
 }
 
@@ -59,7 +62,7 @@ function daysBetween(startDate, endDate) {
 }
 
 function formatDate(date) {
-  return date.getMonth() + '/' + date.getDate() + '/' + date.getFullYear();
+  return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
 }
 
 function formatDollars(amount) {
@@ -176,6 +179,18 @@ function applyPayment(date, days, balance, rate, amount) {
   return newBalance;
 }
 
+function extendAdvance(date, amount, balance) {
+  var advanceRow = document.createElement('div');
+  balance += amount;
+  advanceRow.className = 'divTableRow';
+  advanceRow.appendChild(getCol(formatDate(date)));
+  advanceRow.appendChild(getCol('Loan Advance'));
+  advanceRow.appendChild(getCol(formatDollars(amount)));
+  advanceRow.appendChild(getCol(formatDollars(balance)));
+  document.getElementById('ledger').appendChild(advanceRow);
+  return balance;
+}
+
 
 function getIt() {
   var rate = initialRate;
@@ -201,7 +216,13 @@ function getIt() {
     } else if(item.amount != null) {
       var newDate = item.date;
       var days = daysBetween(prevDate, newDate);
-      balance = applyPayment(newDate, days, balance, rate, item.amount);
+      if(item.amount < 0)
+      {
+        balance = chargeInterest(newDate, days, balance, rate);
+        balance = extendAdvance(newDate, -item.amount, balance);
+      } else {
+        balance = applyPayment(newDate, days, balance, rate, item.amount);        
+      }
       prevDate = newDate;
     }
   }
