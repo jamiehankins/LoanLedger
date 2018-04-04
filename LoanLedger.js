@@ -220,7 +220,10 @@ function getIt() {
       var days = daysBetween(prevDate, newDate);
       if(item.amount < 0)
       {
-        balance = chargeInterest(newDate, days, balance, rate);
+        if(days > 0)
+        {
+          balance = chargeInterest(newDate, days, balance, rate);
+        }
         balance = extendAdvance(newDate, -item.amount, balance);
       } else {
         balance = applyPayment(newDate, days, balance, rate, item.amount);        
