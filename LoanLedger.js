@@ -22,6 +22,8 @@ function initData() {
     var ret = 0;
     var aDate = a.date;
     var bDate = b.date;
+    // For some reason, dates don't compare using !=.
+    // Converting them to strings takes care of that.
     if(formatDate(aDate) != formatDate(bDate)) {
       ret = aDate < bDate ? -1 : 1;
     } else {
