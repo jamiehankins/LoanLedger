@@ -208,20 +208,18 @@ function getIt() {
   document.getElementById('ledger').appendChild(initialRow);
   for(var i = 0; i < ledger.length; ++i) {
     var item = ledger[i];
+    var newDate = item.date;
+    var days = daysBetween(prevDate, newDate);
     if(item.rate != null && rate != ledger[i].rate) {
-      var newDate = item.date;
-      var days = daysBetween(prevDate, newDate);
-      balance = chargeInterest(newDate, days, balance, rate);
+      if(days > 0) {
+        balance = chargeInterest(newDate, days, balance, rate);
+      }
       rate = item.rate;
       changeInterest(newDate, rate);
       prevDate = newDate;
     } else if(item.amount != null) {
-      var newDate = item.date;
-      var days = daysBetween(prevDate, newDate);
-      if(item.amount < 0)
-      {
-        if(days > 0)
-        {
+      if(item.amount < 0) {
+        if(days > 0) {
           balance = chargeInterest(newDate, days, balance, rate);
         }
         balance = extendAdvance(newDate, -item.amount, balance);
