@@ -16,6 +16,15 @@ function initData() {
     item.amount = payments[i].amount;
     ledger.push(item);
   }
+  // Add a zero transaction to the end so that we get current balance.
+  var item = [];
+  item.date = new Date();
+  // Set the date to the last second of the day
+  // in case there's another transaction.
+  item.date.setHours(23, 59, 59, 999);
+  item.rate = null;
+  item.amount = 0;
+  ledger.push(item);
   // Sort the ledger by date, and put
   // rate changes before payments.
   ledger.sort(function(a, b) {
@@ -71,6 +80,15 @@ function formatDollars(amount) {
   return '$' + amount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 }
 
+function getNumberCol(val) {
+  var valCol = document.createElement('div');
+  valCol.className = 'divTableCell number';
+  if(val != null) {
+    valCol.innerHTML = val;
+  }
+  return valCol;  
+}
+
 function getCol(val) {
   var valCol = document.createElement('div');
   valCol.className = 'divTableCell';
@@ -96,8 +114,8 @@ function chargeInterest(date, days, balance, rate) {
   chargeRow.className = 'divTableRow';
   chargeRow.appendChild(getCol(formatDate(date)));
   chargeRow.appendChild(getCol('Accrued Interest (' + days + ' days)'));
-  chargeRow.appendChild(getCol(formatDollars(interest)));
-  chargeRow.appendChild(getCol(formatDollars(newBalance)));
+  chargeRow.appendChild(getNumberCol(formatDollars(interest)));
+  chargeRow.appendChild(getNumberCol(formatDollars(newBalance)));
 
   // Get ledger and add charge row.
   var ledgerElement = document.getElementById('ledger');
@@ -112,7 +130,7 @@ function changeInterest(date, rate) {
   changeRow.className = 'divTableRow';
   changeRow.appendChild(getCol(formatDate(date)));
   changeRow.appendChild(getCol('New Interest Rate'));
-  changeRow.appendChild(getCol(rate.toFixed(2) + '%'));
+  changeRow.appendChild(getNumberCol(rate.toFixed(2) + '%'));
   changeRow.appendChild(getCol(''));
 
   // Get ledger and add change row.
@@ -132,7 +150,7 @@ function applyPayment(date, days, balance, rate, amount) {
   accruedRow.className = 'divTableRow';
   accruedRow.appendChild(getCol(formatDate(date)));
   accruedRow.appendChild(getCol('Accrued Interest (' + days + ' days)'));
-  accruedRow.appendChild(getCol(formatDollars(interest)));
+  accruedRow.appendChild(getNumberCol(formatDollars(interest)));
   accruedRow.appendChild(getCol(''));
 
   // Next row is the same regardless of whether the payment
@@ -141,7 +159,7 @@ function applyPayment(date, days, balance, rate, amount) {
   intRow.className = 'divTableRow';
   intRow.appendChild(getCol(''));
   intRow.appendChild(getCol('Payment (Interest)'));
-  intRow.appendChild(getCol(formatDollars(interest)));
+  intRow.appendChild(getNumberCol(formatDollars(interest)));
   intRow.appendChild(getCol(''));
   
   // Next row is determined by whether outstanding interest
@@ -151,12 +169,12 @@ function applyPayment(date, days, balance, rate, amount) {
   if(balanceAdjustment < 0) {
     effectRow.appendChild(getCol(''));
     effectRow.appendChild(getCol('Payment (Principle)'));
-    effectRow.appendChild(getCol(formatDollars(amount - interest)));
+    effectRow.appendChild(getNumberCol(formatDollars(amount - interest)));
     effectRow.appendChild(getCol(''));
   } else if(balanceAdjustment > 0) {
     effectRow.appendChild(getCol(''));
     effectRow.appendChild(getCol('Remaining Interest Applied'));
-    effectRow.appendChild(getCol(formatDollars(interest - amount)));
+    effectRow.appendChild(getNumberCol(formatDollars(interest - amount)));
     effectRow.appendChild(getCol(''));
   }
   // Note that in the rare case where balanceAdjustment == 0,
@@ -168,8 +186,8 @@ function applyPayment(date, days, balance, rate, amount) {
   totalRow.className = 'divTableRow';
   totalRow.appendChild(getCol(formatDate(date)));
   totalRow.appendChild(getCol('Payment (Total)'));
-  totalRow.appendChild(getCol(formatDollars(amount)));
-  totalRow.appendChild(getCol(formatDollars(newBalance)));
+  totalRow.appendChild(getNumberCol(formatDollars(amount)));
+  totalRow.appendChild(getNumberCol(formatDollars(newBalance)));
 
     // Get ledger and add rows.
     var ledgerElement = document.getElementById('ledger');
@@ -187,16 +205,25 @@ function extendAdvance(date, amount, balance) {
   advanceRow.className = 'divTableRow';
   advanceRow.appendChild(getCol(formatDate(date)));
   advanceRow.appendChild(getCol('Loan Advance'));
-  advanceRow.appendChild(getCol(formatDollars(amount)));
-  advanceRow.appendChild(getCol(formatDollars(balance)));
+  advanceRow.appendChild(getNumberCol(formatDollars(amount)));
+  advanceRow.appendChild(getNumberCol(formatDollars(balance)));
   document.getElementById('ledger').appendChild(advanceRow);
   return balance;
 }
 
+function addCurrentBalance(date, balance) {
+  var balanceRow = document.createElement('div');
+  balanceRow.className = 'divTableRow';
+  balanceRow.appendChild(getCol(formatDate(date)));
+  balanceRow.appendChild(getCol('Current Balance'));
+  balanceRow.appendChild(getCol(''));
+  balanceRow.appendChild(getNumberCol(formatDollars(balance)));
+  document.getElementById('balance').appendChild(balanceRow);
+}
 
 function getIt() {
   var rate = initialRate;
-  var prevDate = parseDate("7/27/2016");
+  var prevDate = parseDate(initialDate);
   var balance = initialBalance;
 
   var initialRow = document.createElement('div');
@@ -204,7 +231,7 @@ function getIt() {
   initialRow.appendChild(getCol(formatDate(prevDate)));
   initialRow.appendChild(getCol('Initial Balance'));
   initialRow.appendChild(getCol(''));
-  initialRow.appendChild(getCol(formatDollars(balance)));
+  initialRow.appendChild(getNumberCol(formatDollars(balance)));
   document.getElementById('ledger').appendChild(initialRow);
   for(var i = 0; i < ledger.length; ++i) {
     var item = ledger[i];
@@ -218,15 +245,20 @@ function getIt() {
       changeInterest(newDate, rate);
       prevDate = newDate;
     } else if(item.amount != null) {
-      if(item.amount < 0) {
+      if(item.amount <= 0) {
         if(days > 0) {
           balance = chargeInterest(newDate, days, balance, rate);
         }
-        balance = extendAdvance(newDate, -item.amount, balance);
+        if(item.amount < 0) {
+          balance = extendAdvance(newDate, -item.amount, balance);
+        } else {
+          addCurrentBalance(newDate, balance);
+        }
       } else {
         balance = applyPayment(newDate, days, balance, rate, item.amount);        
       }
       prevDate = newDate;
     }
   }
+  
 }
