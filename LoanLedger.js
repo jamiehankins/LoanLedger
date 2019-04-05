@@ -153,13 +153,13 @@ function applyPayment(date, days, balance, rate, amount) {
   accruedRow.appendChild(getNumberCol(formatDollars(interest)));
   accruedRow.appendChild(getCol(''));
 
-  // Next row is the same regardless of whether the payment
-  // is more than the accrued interest.
+  // Next row is the lessor of the payment and the accrued interest.
+  var paidInterest = Math.min(amount, interest);
   var intRow = document.createElement('div');
   intRow.className = 'divTableRow';
   intRow.appendChild(getCol(''));
   intRow.appendChild(getCol('Payment (Interest)'));
-  intRow.appendChild(getNumberCol(formatDollars(interest)));
+  intRow.appendChild(getNumberCol(formatDollars(paidInterest)));
   intRow.appendChild(getCol(''));
   
   // Next row is determined by whether outstanding interest
