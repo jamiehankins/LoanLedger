@@ -48,6 +48,26 @@ function initData() {
   });
 }
 
+var rowCounter = 0;
+
+function getRow(extendRow = false, date = null) {
+  var row = document.createElement('div');
+  if(!extendRow) {
+    ++rowCounter;
+  }
+  if(rowCounter % 2) {
+    row.className = 'divTableRow alternateShading';
+  } else {
+    row.className = 'divTableRow';
+  }
+  if(date) {
+    row.appendChild(getCol(formatDate(date)));
+  } else {
+    row.appendChild(getCol(''));
+  }
+  return row;
+}
+
 function parseDate(s) {
   var d = new Date();
   s = s.split('/');
@@ -72,7 +92,8 @@ function daysBetween(startDate, endDate) {
   return ((treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay).toFixed(0);
 }
 
-function formatDate(date) {
+function formatDate(dateParam) {
+  var date = new Date(dateParam);
   return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
 }
 
@@ -110,12 +131,10 @@ function chargeInterest(date, days, balance, rate) {
   var interest = newBalance - balance;
 
   // Build interest charge row.
-  var chargeRow = document.createElement('div');
-  chargeRow.className = 'divTableRow';
-  chargeRow.appendChild(getCol(formatDate(date)));
-  chargeRow.appendChild(getCol('Accrued Interest (' + days + ' days)'));
+  var chargeRow = getRow(false, date);
+  chargeRow.appendChild(getCol('Accrued Interest at ' + +rate.toFixed(6) + '% (' + days + ' days)'));
   chargeRow.appendChild(getNumberCol(formatDollars(interest)));
-  chargeRow.appendChild(getNumberCol(formatDollars(newBalance)));
+  chargeRow.appendChild(getCol(''));
 
   // Get ledger and add charge row.
   var ledgerElement = document.getElementById('ledger');
@@ -124,14 +143,12 @@ function chargeInterest(date, days, balance, rate) {
   return newBalance;
 }
 
-function changeInterest(date, rate) {
+function changeInterest(balance, rate) {
   // Build interest change row.
-  var changeRow = document.createElement('div');
-  changeRow.className = 'divTableRow';
-  changeRow.appendChild(getCol(formatDate(date)));
-  changeRow.appendChild(getCol('New Interest Rate'));
-  changeRow.appendChild(getNumberCol(+rate.toFixed(6) + '%'));
+  var changeRow = getRow(true);
+  changeRow.appendChild(getCol('New Interest Rate (' + +rate.toFixed(6) + '%)'));
   changeRow.appendChild(getCol(''));
+  changeRow.appendChild(getNumberCol(formatDollars(balance)));
 
   // Get ledger and add change row.
   var ledgerElement = document.getElementById('ledger');
@@ -146,64 +163,56 @@ function applyPayment(date, days, balance, rate, amount) {
   var newBalance = balanceAdjustment + balance;
 
   // First row will give accrued interest and days.
-  var accruedRow = document.createElement('div');
-  accruedRow.className = 'divTableRow';
-  accruedRow.appendChild(getCol(formatDate(date)));
+  var accruedRow = getRow(false, date);
   accruedRow.appendChild(getCol('Accrued Interest at ' + +rate.toFixed(6) + '% (' + days + ' days)'));
   accruedRow.appendChild(getNumberCol(formatDollars(interest)));
   accruedRow.appendChild(getCol(''));
 
   // Next row is the lessor of the payment and the accrued interest.
   var paidInterest = Math.min(amount, interest);
-  var intRow = document.createElement('div');
-  intRow.className = 'divTableRow';
-  intRow.appendChild(getCol(''));
+  var intRow = getRow(true);
   intRow.appendChild(getCol('Payment (Interest)'));
   intRow.appendChild(getNumberCol(formatDollars(paidInterest)));
-  intRow.appendChild(getCol(''));
   
+  // Total row is the same regardless.
+  var totalRow = getRow(true);
+  totalRow.appendChild(getCol('Payment (Total)'));
+  totalRow.appendChild(getNumberCol(formatDollars(amount)));
+  totalRow.appendChild(getCol(''));
+
   // Next row is determined by whether outstanding interest
   // is covered by payment.
-  var effectRow = document.createElement('div');
-  effectRow.classList = 'divTableRow';
+  var effectRow = getRow(true);
   if(balanceAdjustment < 0) {
-    effectRow.appendChild(getCol(''));
     effectRow.appendChild(getCol('Payment (Principle)'));
     effectRow.appendChild(getNumberCol(formatDollars(amount - interest)));
-    effectRow.appendChild(getCol(''));
+    effectRow.appendChild(getNumberCol(formatDollars(newBalance)));
+    intRow.appendChild(getCol(''));
   } else if(balanceAdjustment > 0) {
-    effectRow.appendChild(getCol(''));
     effectRow.appendChild(getCol('Remaining Interest Applied'));
     effectRow.appendChild(getNumberCol(formatDollars(interest - amount)));
-    effectRow.appendChild(getCol(''));
-  }
+    effectRow.appendChild(getNumberCol(formatDollars(newBalance)));
+    intRow.appendChild(getCol(''));
+  } else {
+    intRow.appendChild(getNumberCol(formatDollars(newBalance)));
+  }  
   // Note that in the rare case where balanceAdjustment == 0,
   // we'll just do neither and skip the row mentioning principle
   // payment or interest accrual.
 
-  // Total row is the same regardless.
-  var totalRow = document.createElement('div');
-  totalRow.className = 'divTableRow';
-  totalRow.appendChild(getCol(formatDate(date)));
-  totalRow.appendChild(getCol('Payment (Total)'));
-  totalRow.appendChild(getNumberCol(formatDollars(amount)));
-  totalRow.appendChild(getNumberCol(formatDollars(newBalance)));
-
-    // Get ledger and add rows.
-    var ledgerElement = document.getElementById('ledger');
-    ledgerElement.appendChild(accruedRow);
-    ledgerElement.appendChild(intRow);
-    ledgerElement.appendChild(effectRow);
-    ledgerElement.appendChild(totalRow); 
+  // Get ledger and add rows.
+  var ledgerElement = document.getElementById('ledger');
+  ledgerElement.appendChild(accruedRow);
+  ledgerElement.appendChild(totalRow); 
+  ledgerElement.appendChild(intRow);
+  ledgerElement.appendChild(effectRow);
 
   return newBalance;
 }
 
 function extendAdvance(date, amount, balance) {
-  var advanceRow = document.createElement('div');
   balance += amount;
-  advanceRow.className = 'divTableRow';
-  advanceRow.appendChild(getCol(formatDate(date)));
+  var advanceRow = getRow(false, date);
   advanceRow.appendChild(getCol('Loan Advance'));
   advanceRow.appendChild(getNumberCol(formatDollars(amount)));
   advanceRow.appendChild(getNumberCol(formatDollars(balance)));
@@ -212,9 +221,7 @@ function extendAdvance(date, amount, balance) {
 }
 
 function addCurrentBalance(date, balance) {
-  var balanceRow = document.createElement('div');
-  balanceRow.className = 'divTableRow';
-  balanceRow.appendChild(getCol(formatDate(date)));
+  var balanceRow = getRow(false, date);
   balanceRow.appendChild(getCol('Current Balance'));
   balanceRow.appendChild(getCol(''));
   balanceRow.appendChild(getNumberCol(formatDollars(balance)));
@@ -227,16 +234,12 @@ function getIt() {
   var balance = initialBalance;
   var ledgerElement = document.getElementById('ledger');
 
-  var initialRow = document.createElement('div');
-  initialRow.className = 'divTableRow';
-  initialRow.appendChild(getCol(formatDate(prevDate)));
-  initialRow.appendChild(getCol('Initial Interest Rate'));
-  initialRow.appendChild(getNumberCol(+rate.toFixed(6) + '%'));
+  var initialRow = getRow(false, initialDate);
+  initialRow.appendChild(getCol('Initial Interest Rate (' + +rate.toFixed(6) + '%)'));
+  initialRow.appendChild(getCol(''));
   initialRow.appendChild(getCol(''));
   ledgerElement.appendChild(initialRow);
-  initialRow = document.createElement('div');
-  initialRow.className = 'divTableRow';
-  initialRow.appendChild(getCol(''));
+  initialRow = getRow(true);
   initialRow.appendChild(getCol('Initial Balance'));
   initialRow.appendChild(getNumberCol(formatDollars(balance)));
   initialRow.appendChild(getNumberCol(formatDollars(balance)));
@@ -250,7 +253,7 @@ function getIt() {
         balance = chargeInterest(newDate, days, balance, rate);
       }
       rate = item.rate;
-      changeInterest(newDate, rate);
+      changeInterest(balance, rate);
       prevDate = newDate;
     } else if(item.amount != null) {
       if(item.amount <= 0) {
@@ -268,5 +271,4 @@ function getIt() {
       prevDate = newDate;
     }
   }
-  
 }

@@ -1,27 +1,29 @@
-div.paleBlueRows {
+div.ledgerRows {
     font-family: "Arial", Times, serif;
     border: 1px solid #FFFFFF;
     text-align: left;
     border-collapse: collapse;
   }
-  .divTable.paleBlueRows .divTableCell, .divTable.paleBlueRows .divTableHead {
+  .divTable.ledgerRows .divTableCell, .divTable.ledgerRows .divTableHead {
     border: 1px solid #FFFFFF;
     padding: 3px 2px;
   }
-  .divTable.paleBlueRows .divTableBody .divTableCell {
+  .divTable.ledgerRows .divTableBody .divTableCell {
     font-size: 2em;
   }
-  .divTable.paleBlueRows .number {
+  .divTable.ledgerRows .number {
     text-align: right;
   }
-  .divTable.paleBlueRows .divTableRow:nth-child(even) {
+  /*
+  .divTable.ledgerRows .divTableRow:nth-child(even) {
     background: #D0E4F5;
   }
-  .divTable.paleBlueRows .divTableHeading {
+  */
+  .divTable.ledgerRows .divTableHeading {
     background: #0B6FA4;
     border-bottom: 5px solid #FFFFFF;
   }
-  .divTable.paleBlueRows .divTableHeading .divTableHead {
+  .divTable.ledgerRows .divTableHeading .divTableHead {
     font-size: 2em;
     font-weight: bold;
     color: #FFFFFF;
@@ -29,20 +31,22 @@ div.paleBlueRows {
     border-left: 2px solid #FFFFFF;
     padding:5px 40px;
   }
-  .divTable.paleBlueRows .divTableHeading .divTableHead:first-child {
+  .divTable.ledgerRows .divTableHeading .divTableHead:first-child {
     border-left: none;
   }
   
-  .paleBlueRows .tableFootStyle {
+  .ledgerRows .tableFootStyle {
     font-size: 14px;
     font-weight: bold;
     color: #333333;
     background: #D0E4F5;
     border-top: 3px solid #444444;
   }
-  .paleBlueRows .tableFootStyle {
+  .ledgerRows .tableFootStyle {
     font-size: 2em;
   }
+
+  /* CSS Table */
   .divTable{ display: table; }
   .divTableRow { display: table-row; }
   .divTableHeading { display: table-header-group;}
