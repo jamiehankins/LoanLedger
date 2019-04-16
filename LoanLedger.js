@@ -130,7 +130,7 @@ function changeInterest(date, rate) {
   changeRow.className = 'divTableRow';
   changeRow.appendChild(getCol(formatDate(date)));
   changeRow.appendChild(getCol('New Interest Rate'));
-  changeRow.appendChild(getNumberCol(rate.toFixed(2) + '%'));
+  changeRow.appendChild(getNumberCol(+rate.toFixed(6) + '%'));
   changeRow.appendChild(getCol(''));
 
   // Get ledger and add change row.
@@ -149,7 +149,7 @@ function applyPayment(date, days, balance, rate, amount) {
   var accruedRow = document.createElement('div');
   accruedRow.className = 'divTableRow';
   accruedRow.appendChild(getCol(formatDate(date)));
-  accruedRow.appendChild(getCol('Accrued Interest (' + days + ' days)'));
+  accruedRow.appendChild(getCol('Accrued Interest at ' + +rate.toFixed(6) + '% (' + days + ' days)'));
   accruedRow.appendChild(getNumberCol(formatDollars(interest)));
   accruedRow.appendChild(getCol(''));
 
@@ -225,14 +225,22 @@ function getIt() {
   var rate = initialRate;
   var prevDate = parseDate(initialDate);
   var balance = initialBalance;
+  var ledgerElement = document.getElementById('ledger');
 
   var initialRow = document.createElement('div');
   initialRow.className = 'divTableRow';
   initialRow.appendChild(getCol(formatDate(prevDate)));
-  initialRow.appendChild(getCol('Initial Balance'));
+  initialRow.appendChild(getCol('Initial Interest Rate'));
+  initialRow.appendChild(getNumberCol(+rate.toFixed(6) + '%'));
   initialRow.appendChild(getCol(''));
+  ledgerElement.appendChild(initialRow);
+  initialRow = document.createElement('div');
+  initialRow.className = 'divTableRow';
+  initialRow.appendChild(getCol(''));
+  initialRow.appendChild(getCol('Initial Balance'));
   initialRow.appendChild(getNumberCol(formatDollars(balance)));
-  document.getElementById('ledger').appendChild(initialRow);
+  initialRow.appendChild(getNumberCol(formatDollars(balance)));
+  ledgerElement.appendChild(initialRow);
   for(var i = 0; i < ledger.length; ++i) {
     var item = ledger[i];
     var newDate = item.date;
