@@ -1,11 +1,9 @@
 div.ledgerRows {
   font-family: "Arial", Times, serif;
-  border: 1px solid #FFFFFF;
   text-align: left;
   border-collapse: collapse;
 }
 .divTable.ledgerRows .divTableCell, .divTable.ledgerRows .divTableHead {
-  border: 1px solid #FFFFFF;
   padding: 3px 2px;
 }
 .divTable.ledgerRows .divTableBody .divTableCell {
@@ -14,11 +12,6 @@ div.ledgerRows {
 .divTable.ledgerRows .number {
   text-align: right;
 }
-/*
-.divTable.ledgerRows .divTableRow:nth-child(even) {
-  background: #D0E4F5;
-}
-*/
 .divTable.ledgerRows .alternateShading {
   background: #D0E4F5;
 }
