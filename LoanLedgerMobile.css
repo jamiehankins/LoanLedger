@@ -14,12 +14,10 @@ div.ledgerRows {
   .divTable.ledgerRows .number {
     text-align: right;
   }
-  /*
-  .divTable.ledgerRows .divTableRow:nth-child(even) {
+  .divTable.ledgerRows .alternateShading {
     background: #D0E4F5;
   }
-  */
-  .divTable.ledgerRows .divTableHeading {
+    .divTable.ledgerRows .divTableHeading {
     background: #0B6FA4;
     border-bottom: 5px solid #FFFFFF;
   }
