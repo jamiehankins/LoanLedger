@@ -1,11 +1,9 @@
 div.ledgerRows {
     font-family: "Arial", Times, serif;
-    border: 1px solid #FFFFFF;
     text-align: left;
     border-collapse: collapse;
   }
   .divTable.ledgerRows .divTableCell, .divTable.ledgerRows .divTableHead {
-    border: 1px solid #FFFFFF;
     padding: 3px 2px;
   }
   .divTable.ledgerRows .divTableBody .divTableCell {
