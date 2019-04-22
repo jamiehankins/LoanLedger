@@ -6,9 +6,6 @@ div.ledgerRows {
 .divTable.ledgerRows .divTableCell, .divTable.ledgerRows .divTableHead {
   padding: 3px 2px;
 }
-.divTable.ledgerRows .divTableBody .divTableCell {
-  font-size: 13px;
-}
 .divTable.ledgerRows .number {
   text-align: right;
 }
@@ -20,7 +17,6 @@ div.ledgerRows {
   border-bottom: 5px solid #FFFFFF;
 }
 .divTable.ledgerRows .divTableHeading .divTableHead {
-  font-size: 17px;
   font-weight: bold;
   color: #FFFFFF;
   text-align: center;
@@ -30,16 +26,12 @@ div.ledgerRows {
 .divTable.ledgerRows .divTableHeading .divTableHead:first-child {
   border-left: none;
 }
-
 .ledgerRows .tableFootStyle {
   font-size: 14px;
   font-weight: bold;
   color: #333333;
   background: #D0E4F5;
   border-top: 3px solid #444444;
-}
-  .ledgerRows .tableFootStyle {
-  font-size: 14px;
 }
 
 /* CSS Table */
