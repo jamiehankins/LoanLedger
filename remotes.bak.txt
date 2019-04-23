@@ -1,7 +1,0 @@
-all     https://github.com/jamiehankins/LoanLedger.git (fetch)
-all     https://jhankins:am30wm1K!@loansharksrus.scm.azurewebsites.net:443/loansharksrus.git (push)
-all     https://github.com/jamiehankins/LoanLedger.git (push)
-azure   https://jhankins:am30wm1K!@loansharksrus.scm.azurewebsites.net:443/loansharksrus.git (fetch)
-azure   https://jhankins:am30wm1K!@loansharksrus.scm.azurewebsites.net:443/loansharksrus.git (push)
-github  https://github.com/jamiehankins/LoanLedger.git (fetch)
-github  https://github.com/jamiehankins/LoanLedger.git (push)
