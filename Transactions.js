@@ -1,5 +1,3 @@
-var initialBalance = 90000;
-var initialDate = "7/27/2016";
 var payments = [
 { "date": "8/8/2016", "amount": 1000 },
 { "date": "9/19/2016", "amount": 1000 },
@@ -7,7 +5,6 @@ var payments = [
 { "date": "11/23/2016", "amount": 1000 },
 { "date": "12/21/2016", "amount": 1000 },
 { "date": "1/20/2017", "amount": 1000 },
-{ "date": "1/20/2017", "amount": -10000 },
 { "date": "2/27/2017", "amount": 1000 },
 { "date": "5/30/2017", "amount": 1000 },
 { "date": "6/30/2017", "amount": 1000 },
@@ -25,4 +22,8 @@ var payments = [
 { "date": "7/26/2018", "amount": 1000 },
 { "date": "8/31/2018", "amount": 1000 },
 { "date": "4/3/2019", "amount": 1000 },
+];
+var advances = [
+    { "date": "7/27/2016", "amount": 90000 },
+    { "date": "1/20/2017", "amount": 10000 }
 ];
