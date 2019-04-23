@@ -122,6 +122,7 @@ function calculateValues(ledger) {
 
 function calculateInterestChange(item, prevDate, prevRate, balance) {
   item.balance = calculateBalance(item, prevDate, prevRate, balance);
+  item.oldRate = prevRate;
   return item.balance;
 }
 
@@ -228,10 +229,10 @@ function calculateInterest(date, days, rate, balance) {
   return interest;
 }
 
-function addInterestChargeRow(item, ledgerElement) {
+function addInterestChargeRow(item, rate, ledgerElement) {
   // Build interest charge row.
   var chargeRow = getRow(false, item.date);
-  chargeRow.appendChild(getCol('Accrued Interest at ' + +item.rate.toFixed(6) + '% (' + item.days + ' days)'));
+  chargeRow.appendChild(getCol('Accrued Interest at ' + +rate.toFixed(6) + '% (' + item.days + ' days)'));
   chargeRow.appendChild(getNumberCol(formatDollars(item.interest)));
   chargeRow.appendChild(getCol(''));
   ledgerElement.appendChild(chargeRow);
@@ -239,7 +240,7 @@ function addInterestChargeRow(item, ledgerElement) {
 
 function addInterestChange(item, ledgerElement) {
   if(item.interest > 0) {
-    addInterestChargeRow(item, ledgerElement);
+    addInterestChargeRow(item, item.oldRate, ledgerElement);
   }
   // Build interest change row.
   var changeRow = getRow(true);
@@ -251,7 +252,7 @@ function addInterestChange(item, ledgerElement) {
 
 function addAdvance(item, ledgerElement) {
   if(item.interest > 0) {
-    addInterestChargeRow(item, ledgerElement);
+    addInterestChargeRow(item, item.rate, ledgerElement);
   }
   var advanceRow = getRow(true);
   advanceRow.appendChild(getCol('Loan Advance'));
@@ -262,7 +263,7 @@ function addAdvance(item, ledgerElement) {
 
 function addPayment(item, ledgerElement) {
   if(item.interest > 0) {
-    addInterestChargeRow(item, ledgerElement);
+    addInterestChargeRow(item, item.rate, ledgerElement);
   }
 
   var totalRow = getRow(true);
