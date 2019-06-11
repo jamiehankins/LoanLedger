@@ -27,5 +27,6 @@ var payments = [
 ];
 var advances = [
     { "date": "7/27/2016", "amount": 90000 },
-    { "date": "1/20/2017", "amount": 10000 }
+    { "date": "1/20/2017", "amount": 10000 },
+    { "date": "6/11/2019", "amount": 25000 },
 ];
