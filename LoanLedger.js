@@ -11,7 +11,7 @@ function initData() {
   // Then, add all rate settings to ledger.
   for(i = 0; i < rates.length; ++i) {
     var item = [];
-    item.type = 'ratechange';
+    item.type = 'rateChange';
     item.date = parseDate(rates[i].date);
     item.rate = rates[i].rate;
     ledger.push(item);
@@ -52,8 +52,8 @@ function initData() {
   var item = [];
   item.type = 'terminator';
   item.date = new Date();
-  // Set the date to the last second of the day
-  // in case there's another transaction.
+  // Set the date to the last milisecond of the day
+  // in case there's another transaction on the last day.
   item.date.setHours(23, 59, 59, 999);
   item.rate = null;
   item.amount = 0;
@@ -65,9 +65,9 @@ function initData() {
     if(0 === ret) {
       if(a.type != b.type) {
         // Only continue if the types don't match. Otherwise, let it be zero.
-        if(a.type === 'ratechange' || b.type === 'ratechange') {
+        if(a.type === 'rateChange' || b.type === 'rateChange') {
           // If it's a rate change, that goes first.
-          ret = a.type === 'ratechange' ? -1 : 1;
+          ret = a.type === 'rateChange' ? -1 : 1;
         } else if(a.type === 'advance' || b.type === 'advance') {
           // Advances go next.
           ret = a.type === 'advance' ? -1 : 1;
@@ -78,7 +78,7 @@ function initData() {
         }
       } else {
         // We want this to be deterministic, so we'll sort by amount or rate.
-        if(a.type === 'ratechange') {
+        if(a.type === 'rateChange') {
           ret = a.rate > b.rate ? -1 : 1;
         } else {
           ret = a.amount > b.amount ? -1: 1;      
@@ -99,7 +99,7 @@ function calculateValues(ledger) {
     var item = ledger[i];
 
     switch(item.type) {
-    case 'ratechange':
+    case 'rateChange':
       balance = calculateInterestChange(item, prevDate, rate, balance, rate);
       rate = item.rate;
       break;
@@ -317,7 +317,7 @@ function displayLedger(ledger) {
   for(var i = 0; i < ledger.length; ++i) {
     var item = ledger[i];
     switch(item.type) {
-      case 'ratechange':
+      case 'rateChange':
         addInterestChange(item, ledgerElement);
         break;
       case 'advance':
@@ -327,6 +327,9 @@ function displayLedger(ledger) {
         addPayment(item, ledgerElement);
         break;
       case 'terminator':
+        if(item.interest > 0) {
+          addInterestChargeRow(item, item.rate, ledgerElement);
+        }
         addTerminator(item, document.getElementById('balance'));
         break;
     }
