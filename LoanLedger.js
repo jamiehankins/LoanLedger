@@ -190,6 +190,11 @@ function daysBetween(startDate, endDate) {
   return ((treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay).toFixed(0);
 }
 
+function addDays (date, daysToAdd) {
+  var newDate = new Date(date);
+  return newDate.setDate(date.getDate() + daysToAdd) && newDate;
+}
+
 function formatDate(dateParam) {
   var date = new Date(dateParam);
   return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
@@ -217,14 +222,42 @@ function getCol(val) {
   return valCol;
 }
 
-// TODO: This doesn't take into account if a the previous date and the current
-// date straddle a new year where one is a leap year.
+function calculateInterestForDays(days, dailyRate, balance) {
+  var interest = 0;
+  if(dailyRate > 0 && balance > 0 && days > 0)
+  {
+    var newBalance = balance * Math.pow(1 + dailyRate, days);
+    interest = newBalance - balance;
+  }
+  return interest;
+}
+
+function calculateDailyRate(date, rate) {
+  return isLeapYear(date.getFullYear()) ? rate / 100 / 366 : rate / 100 / 365;
+}
+
+// This function now handles the edge case where you're calculating interest
+// for a period where part of your calculation is in daylight savings.
+// This could probably be optimized a bit, but calculating it a year at a time
+// works fine.
+// ** I'm not sure this works right for multi-year periods. **
 function calculateInterest(date, days, rate, balance) {
   var interest = 0;
   if(rate > 0 && balance > 0 && days > 0) {
-    var dailyRate = isLeapYear(date.getFullYear()) ? rate / 100 / 366 : rate / 100 / 365;
-    var newBalance = balance * Math.pow(1 + dailyRate, days);
-    interest = newBalance - balance;
+    var prevDate = addDays(date, -days);
+    var remainingDays = days;  
+    var currentDate = prevDate;
+    while(remainingDays > 0) {
+      // This constructor is wonky. Year and day are one-based, but month is 0.
+      var nextYear = new Date(currentDate.getFullYear() + 1, 0, 1);
+      var currentDays = Math.min(remainingDays, daysBetween(currentDate, nextYear));
+      var dailyRate = isLeapYear(date.getFullYear()) ? rate / 100 / 366 : rate / 100 / 365;
+      interest += calculateInterestForDays(currentDays, dailyRate, balance);
+      balance += interest;
+
+      remainingDays -= currentDays;
+      currentDate = addDays(currentDate, currentDays);
+    }
   }
   return interest;
 }
