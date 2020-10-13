@@ -39,6 +39,8 @@ var payments = [
 { "date": "5/29/2020", "amount": 10000 },
 { "date": "6/19/2020", "amount": 1000 },
 { "date": "8/1/2020", "amount": 1000 },
+{ "date": "8/28/2020", "amount": 1000 },
+{ "date": "9/25/2020", "amount": 1000 },
 ];
 var advances = [
     { "date": "7/27/2016", "amount": 90000 },
