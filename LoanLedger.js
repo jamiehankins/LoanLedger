@@ -237,10 +237,9 @@ function calculateDailyRate(date, rate) {
 }
 
 // This function now handles the edge case where you're calculating interest
-// for a period where part of your calculation is in daylight savings.
+// for a period where part of your calculation is in a leap year.
 // This could probably be optimized a bit, but calculating it a year at a time
 // works fine.
-// ** I'm not sure this works right for multi-year periods. **
 function calculateInterest(date, days, rate, balance) {
   var interest = 0;
   if(rate > 0 && balance > 0 && days > 0) {
@@ -251,6 +250,9 @@ function calculateInterest(date, days, rate, balance) {
       // This constructor is wonky. Year and day are one-based, but month is 0.
       var nextYear = new Date(currentDate.getFullYear() + 1, 0, 1);
       var currentDays = Math.min(remainingDays, daysBetween(currentDate, nextYear));
+      // If the period straddles a year-end and there's no transaction after the
+      // new year, currentDays will be zero. In that case, we'll jump.
+      currentDays = Math.max(currentDays, 1);
       var dailyRate = isLeapYear(date.getFullYear()) ? rate / 100 / 366 : rate / 100 / 365;
       interest += calculateInterestForDays(currentDays, dailyRate, balance);
       balance += interest;
