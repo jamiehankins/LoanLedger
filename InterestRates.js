@@ -17,3 +17,5 @@ var rates = [
 { "date": "3/6/2020", "rate": 4.375 },
 { "date": "3/18/2020", "rate": 3.375 },
 ];
+// The FDIC prime lending rate has been 3.25% since March 2020.
+// I pay prime plus .125%.
