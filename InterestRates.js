@@ -16,6 +16,11 @@ var rates = [
 { "date": "11/2/2019", "rate": 4.875 },
 { "date": "3/6/2020", "rate": 4.375 },
 { "date": "3/18/2020", "rate": 3.375 },
+{ "date": "3/17/2022", "rate": 3.625 },
 ];
 // The FDIC prime lending rate has been 3.25% since March 2020.
+// The history can be had from here:
+// https://www.jpmorganchase.com/about/our-business/historical-prime-rate
 // I pay prime plus .125%.
+// Maybe later, I'll add the ability to set the "prime plus" variable and have
+// it query a data source.
