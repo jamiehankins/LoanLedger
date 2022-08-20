@@ -62,6 +62,8 @@ var payments = [
 { "date": "4/29/2022", "amount": 1000 },
 { "date": "5/26/2022", "amount": 1000 },
 { "date": "6/21/2022", "amount": 10000 },
+{ "date": "7/18/2022", "amount": 10000 },
+{ "date": "8/16/2022", "amount": 10000 },
 ];
 var advances = [
     { "date": "7/27/2016", "amount": 90000 },
