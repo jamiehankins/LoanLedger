@@ -24,6 +24,7 @@ var rates = [
 { "date": "11/3/2022", "rate": 7.125 },
 { "date": "12/15/2022", "rate": 7.625 },
 { "date": "2/2/2023", "rate": 7.875 },
+{ "date": "3/23/2023", "rate": 8.125 },
 ];
 // The FDIC prime lending rate has been 3.25% since March 2020.
 // The history can be had from here:
